@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atlas Hotel — Sistema de Gestão Noturna</title>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --bg3: #334155;
+    --accent: #F97316;
+    --accent2: #fb923c;
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --green: #22c55e;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; min-height:100vh; }
+
+  /* HEADER */
+  header {
+    background:var(--bg2);
+    border-bottom:1px solid var(--bg3);
+    padding:0 24px;
+    height:60px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:100;
+  }
+  .logo { display:flex; align-items:center; gap:10px; }
+  .logo-icon {
+    width:36px; height:36px;
+    background:var(--accent);
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:14px; color:#fff;
+  }
+  .logo-text { font-weight:700; font-size:16px; }
+  .logo-sub { font-size:11px; color:var(--text2); }
+  .header-right { display:flex; align-items:center; gap:16px; }
+  .mode-badge {
+    background:#16213e;
+    border:1px solid var(--accent);
+    color:var(--accent);
+    padding:4px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+    display:flex; align-items:center; gap:6px;
+  }
+  .mode-badge::before {
+    content:'';
+    width:6px; height:6px;
+    background:var(--accent);
+    border-radius:50%;
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .clock { font-size:18px; font-weight:700; color:var(--accent); font-variant-numeric:tabular-nums; }
+
+  /* TABS */
+  .tabs {
+    background:var(--bg2);
+    border-bottom:1px solid var(--bg3);
+    display:flex;
+    padding:0 24px;
+  }
+  .tab {
+    padding:14px 20px;
+    cursor:pointer;
+    font-size:13px;
+    font-weight:500;
+    color:var(--text2);
+    border-bottom:2px solid transparent;
+    display:flex; align-items:center; gap:8px;
+    transition:all 0.2s;
+  }
+  .tab:hover { color:var(--text); }
+  .tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+  /* MAIN */
+  main { padding:24px; max-width:1200px; margin:0 auto; }
+
+  /* PANELS */
+  .panel { display:none; }
+  .panel.active { display:block; }
+
+  /* STATS */
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+  .stat-card {
+    background:var(--bg2);
+    border:1px solid var(--bg3);
+    border-radius:12px;
+    padding:20px;
+  }
+  .stat-label { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
+  .stat-value { font-size:32px; font-weight:800; }
+  .stat-value.orange { color:var(--accent); }
+  .stat-value.green { color:var(--green); }
+  .stat-value.blue { color:var(--blue); }
+  .stat-value.white { color:var(--text); }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    color:var(--text2);
+    margin-bottom:16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-title::after { content:''; flex:1; height:1px; background:var(--bg3); }
+
+  /* ROOMS GRID */
+  .rooms-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:24px; }
+  .room-card {
+    background:var(--bg2);
+    border:1px solid var(--bg3);
+    border-radius:10px;
+    padding:14px;
+    cursor:pointer;
+    transition:all 0.2s;
+    position:relative;
+  }
+  .room-card:hover { border-color:var(--accent); transform:translateY(-2px); }
+  .room-card.vago { opacity:0.5; cursor:default; }
+  .room-card.vago:hover { transform:none; border-color:var(--bg3); }
+  .room-number { font-size:15px; font-weight:700; margin-bottom:4px; }
+  .room-guest { font-size:12px; color:var(--text2); margin-bottom:10px; }
+  .room-status {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:3px 10px; border-radius:20px;
+    font-size:11px; font-weight:600;
+  }
+  .status-fora { background:#7c2d12; color:#fed7aa; }
+  .status-retornou { background:#14532d; color:#bbf7d0; }
+  .status-vago { background:var(--bg3); color:var(--text2); }
+  .room-time { font-size:10px; color:var(--text2); margin-top:6px; }
+
+  /* QR PANEL */
+  .qr-container {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+  }
+  .qr-form {
+    background:var(--bg2);
+    border:1px solid var(--bg3);
+    border-radius:12px;
+    padding:24px;
+  }
+  .qr-form h3 { margin-bottom:20px; font-size:16px; }
+  .form-group { margin-bottom:16px; }
+  .form-group label { display:block; font-size:12px; color:var(--text2); margin-bottom:6px; }
+  .form-group input, .form-group select {
+    width:100%;
+    background:var(--bg3);
+    border:1px solid #475569;
+    border-radius:8px;
+    padding:10px 14px;
+    color:var(--text);
+    font-size:14px;
+    outline:none;
+    transition:border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color:var(--accent); }
+  .btn-primary {
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:12px 24px;
+    border-radius:8px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    width:100%;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition:background 0.2s;
+  }
+  .btn-primary:hover { background:var(--accent2); }
+
+  .qr-preview {
+    background:var(--bg2);
+    border:1px solid var(--bg3);
+    border-radius:12px;
+    padding:24px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:16px;
+    text-align:center;
+  }
+  .qr-box {
+    width:200px; height:200px;
+    background:#fff;
+    border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; color:#666;
+    position:relative;
+    overflow:hidden;
+  }
+  .qr-placeholder { color:#aaa; font-size:13px; }
+  .qr-info { font-size:13px; color:var(--text2); }
+  .qr-info strong { color:var(--text); display:block; font-size:16px; margin-bottom:4px; }
+
+  /* GUEST SCREEN */
+  .guest-screen {
+    background:var(--bg2);
+    border:1px solid var(--bg3);
+    border-radius:16px;
+    padding:40px;
+    max-width:480px;
+    margin:0 auto;
+    text-align:center;
+  }
+  .guest-hotel-name { font-size:28px; font-weight:800; color:var(--accent); margin-bottom:8px; }
+  .guest-subtitle { color:var(--text2); font-size:14px; margin-bottom:32px; }
+  .guest-room-display {
+    background:var(--bg);
+    border-radius:12px;
+    padding:24px;
+    margin-bottom:24px;
+  }
+  .guest-room-number { font-size:48px; font-weight:800; color:var(--accent); }
+  .guest-room-label { font-size:14px; color:var(--text2); margin-top:4px; }
+  .guest-instruction {
+    background:#1a2744;
+    border:1px solid #2d4a8a;
+    border-radius:10px;
+    padding:16px;
+    font-size:14px;
+    color:#93c5fd;
+    line-height:1.6;
+    margin-bottom:24px;
+  }
+  .btn-return {
+    background:var(--green);
+    color:#fff;
+    border:none;
+    padding:16px 32px;
+    border-radius:10px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    width:100%;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    transition:all 0.2s;
+  }
+  .btn-return:hover { background:#16a34a; transform:scale(1.02); }
+  .silent-badge {
+    display:inline-flex; align-items:center; gap:6px;
+    background:#1e293b;
+    border:1px solid var(--bg3);
+    border-radius:20px;
+    padding:6px 16px;
+    font-size:12px;
+    color:var(--text2);
+    margin-top:16px;
+  }
+
+  /* LOG */
+  .log-list { display:flex; flex-direction:column; gap:8px; }
+  .log-item {
+    background:var(--bg2);
+    border:1px solid var(--bg3);
+    border-radius:10px;
+    padding:14px 16px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .log-icon {
+    width:36px; height:36px;
+    border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+    flex-shrink:0;
+  }
+  .li-ret { background:#14532d; color:#22c55e; }
+  .li-out { background:#7c2d12; color:#f97316; }
+  .log-room { font-weight:700; font-size:14px; }
+  .log-desc { font-size:12px; color:var(--text2); margin-top:2px; }
+  .log-time { margin-left:auto; font-size:12px; color:var(--text2); font-variant-numeric:tabular-nums; flex-shrink:0; }
+
+  /* MODAL */
+  .modal-overlay {
+    display:none;
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.7);
+    z-index:200;
+    align-items:center; justify-content:center;
+  }
+  .modal-overlay.open { display:flex; }
+  .modal {
+    background:var(--bg2);
+    border:1px solid var(--bg3);
+    border-radius:16px;
+    padding:28px;
+    width:360px;
+    text-align:center;
+  }
+  .modal h3 { font-size:18px; margin-bottom:8px; }
+  .modal p { color:var(--text2); font-size:14px; margin-bottom:24px; }
+  .modal-btns { display:flex; gap:12px; }
+  .btn-secondary {
+    flex:1; background:var(--bg3); color:var(--text); border:none;
+    padding:12px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;
+  }
+  .btn-confirm {
+    flex:1; background:var(--accent); color:#fff; border:none;
+    padding:12px; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;
+  }
+
+  @media(max-width:768px) {
+    .stats { grid-template-columns:repeat(2,1fr); }
+    .rooms-grid { grid-template-columns:repeat(3,1fr); }
+    .qr-container { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">AH</div>
+    <div>
+      <div class="logo-text">Atlas Hotel</div>
+      <div class="logo-sub">Sistema de Gestão Noturna</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="mode-badge">Modo noturno ativo</div>
+    <div class="clock" id="clock">00:00:00</div>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showPanel('painel',this)"><i class="ri-dashboard-line"></i> Painel</div>
+  <div class="tab" onclick="showPanel('qrcode',this)"><i class="ri-qr-code-line"></i> Gerar QR Code</div>
+  <div class="tab" onclick="showPanel('hospede',this)"><i class="ri-hotel-line"></i> Tela do Hóspede</div>
+  <div class="tab" onclick="showPanel('log',this)"><i class="ri-file-list-line"></i> Log Noturno</div>
+</div>
+
+<main>
+
+  <!-- PAINEL -->
+  <div class="panel active" id="panel-painel">
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Quartos Ocupados</div>
+        <div class="stat-value white" id="s-occ">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Hóspedes Fora</div>
+        <div class="stat-value orange" id="s-out">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Retornos Esta Noite</div>
+        <div class="stat-value green" id="s-ret">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Quartos Vagos</div>
+        <div class="stat-value blue" id="s-empty">0</div>
+      </div>
+    </div>
+
+    <div class="section-title">Status dos Quartos — Clique para registrar retorno</div>
+    <div class="rooms-grid" id="rooms-grid"></div>
+  </div>
+
+  <!-- QR CODE -->
+  <div class="panel" id="panel-qrcode">
+    <div class="qr-container">
+      <div class="qr-form">
+        <h3><i class="ri-qr-code-line"></i> Gerar QR Code para Hóspede</h3>
+        <div class="form-group">
+          <label>Número do Quarto</label>
+          <select id="qr-room">
+            <option value="">Selecione o quarto</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nome do Hóspede</label>
+          <input type="text" id="qr-guest" placeholder="Nome completo">
+        </div>
+        <div class="form-group">
+          <label>Validade do QR Code</label>
+          <select id="qr-validity">
+            <option value="1">1 noite</option>
+            <option value="3">3 noites</option>
+            <option value="7">7 noites</option>
+            <option value="30">Toda a estadia</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="generateQR()">
+          <i class="ri-qr-code-line"></i> Gerar QR Code
+        </button>
+      </div>
+      <div class="qr-preview" id="qr-preview">
+        <div class="qr-box" id="qr-box">
+          <div class="qr-placeholder">
+            <i class="ri-qr-code-line" style="font-size:48px;color:#334155;display:block;margin-bottom:8px;"></i>
+            QR Code aparecerá aqui
+          </div>
+        </div>
+        <div class="qr-info" id="qr-info">
+          Preencha os dados ao lado<br>e clique em Gerar
+        </div>
+        <button class="btn-primary" id="btn-print" style="display:none;max-width:200px;" onclick="printQR()">
+          <i class="ri-printer-line"></i> Imprimir
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOSPEDE -->
+  <div class="panel" id="panel-hospede">
+    <div class="guest-screen">
+      <div class="guest-hotel-name">Atlas Hotel</div>
+      <div class="guest-subtitle">Bem-vindo de volta</div>
+      <div class="guest-room-display">
+        <div class="guest-room-number" id="guest-room-num">101</div>
+        <div class="guest-room-label">Seu Quarto</div>
+      </div>
+      <div class="guest-instruction">
+        <i class="ri-moon-line"></i>
+        Estamos no modo noturno. Por favor, entre em silêncio e dirija-se diretamente ao seu quarto. Obrigado pela consideração com os demais hóspedes.
+      </div>
+      <button class="btn-return" onclick="registerReturn()">
+        <i class="ri-arrow-go-back-line"></i>
+        Registrar Meu Retorno
+      </button>
+      <div class="silent-badge">
+        <i class="ri-volume-mute-line"></i>
+        Silêncio após 22h
+      </div>
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="panel" id="panel-log">
+    <div class="section-title">Registro de Atividades Noturnas</div>
+    <div class="log-list" id="log-list">
+      <div style="text-align:center;padding:40px;color:var(--text2);">
+        <i class="ri-file-list-line" style="font-size:48px;display:block;margin-bottom:12px;"></i>
+        Nenhuma atividade registrada ainda
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modal-title">Registrar Retorno</h3>
+    <p id="modal-body">Confirmar retorno do hóspede?</p>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" id="modal-confirm">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// DADOS DOS QUARTOS
+const rooms = [
+  {num:'101',guest:'Carlos Mendes',status:'fora',time:'21:45'},
+  {num:'102',guest:'Ana Lima',status:'retornou',time:'22:30'},
+  {num:'103',guest:'',status:'vago',time:''},
+  {num:'104',guest:'Fernanda Costa',status:'fora',time:'22:10'},
+  {num:'105',guest:'Paulo Gomes',status:'retornou',time:'23:15'},
+  {num:'106',guest:'Maria Souza',status:'fora',time:'23:00'},
+  {num:'107',guest:'',status:'vago',time:''},
+  {num:'108',guest:'Lucas Pereira',status:'retornou',time:'00:05'},
+  {num:'109',guest:'Roberto Alves',status:'fora',time:'22:50'},
+  {num:'110',guest:'Juliana Nunes',status:'retornou',time:'01:10'},
+  {num:'111',guest:'Diego Santos',status:'fora',time:'22:00'},
+  {num:'112',guest:'Carla Reis',status:'retornou',time:'23:45'},
+  {num:'113',guest:'',status:'vago',time:''},
+  {num:'114',guest:'Bruno Costa',status:'fora',time:'21:30'},
+  {num:'115',guest:'Patrícia Lima',status:'retornou',time:'00:20'},
+];
+
+const logs = [];
+let pendingRoom = null;
+
+function nowStr() {
+  return new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('pt-BR');
+}
+setInterval(updateClock,1000);
+updateClock();
+
+function updateStats() {
+  const occ = rooms.filter(r=>r.status!=='vago').length;
+  const out = rooms.filter(r=>r.status==='fora').length;
+  const ret = rooms.filter(r=>r.status==='retornou').length;
+  const empty = rooms.filter(r=>r.status==='vago').length;
+  document.getElementById('s-occ').textContent = occ;
+  document.getElementById('s-out').textContent = out;
+  document.getElementById('s-ret').textContent = ret;
+  document.getElementById('s-empty').textContent = empty;
+}
+
+function renderRooms() {
+  const grid = document.getElementById('rooms-grid');
+  grid.innerHTML = rooms.map((r,i) => `
+    <div class="room-card ${r.status==='vago'?'vago':''}" onclick="${r.status==='fora'?`openModal(${i})`:''}">
+      <div class="room-number">Qto ${r.num}</div>
+      <div class="room-guest">${r.guest||'Disponível'}</div>
+      <span class="room-status status-${r.status}">
+        <i class="ri-${r.status==='fora'?'walk-line':r.status==='retornou'?'check-line':'home-line'}"></i>
+        ${r.status==='fora'?'Fora':r.status==='retornou'?'Retornou':'Vago'}
+      </span>
+      ${r.time?`<div class="room-time">Desde ${r.time}</div>`:''}
+    </div>
+  `).join('');
+  updateStats();
+  populateQRSelect();
+}
+
+function openModal(idx) {
+  pendingRoom = idx;
+  const r = rooms[idx];
+  document.getElementById('modal-title').textContent = `Registrar Retorno — Qto ${r.num}`;
+  document.getElementById('modal-body').textContent = `${r.guest} retornou ao hotel?`;
+  document.getElementById('modal-confirm').onclick = () => confirmReturn(idx);
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+function confirmReturn(idx) {
+  const r = rooms[idx];
+  r.status = 'retornou';
+  r.time = nowStr();
+  addLog('ret', r.num, r.guest, `Retornou silenciosamente`);
+  renderRooms();
+  closeModal();
+}
+
+function addLog(type, room, guest, desc) {
+  logs.unshift({type, room, guest, desc, time: nowStr()});
+  renderLogs();
+}
+
+function renderLogs() {
+  const list = document.getElementById('log-list');
+  if (!logs.length) return;
+  list.innerHTML = logs.map(l => `
+    <div class="log-item">
+      <div class="log-icon li-${l.type}">
+        <i class="ri-${l.type==='ret'?'arrow-go-back-line':'logout-box-r-line'}"></i>
+      </div>
+      <div>
+        <div class="log-room">Quarto ${l.room} · ${l.guest}</div>
+        <div class="log-desc">${l.desc}</div>
+      </div>
+      <div class="log-time">${l.time}</div>
+    </div>
+  `).join('');
+}
+
+function showPanel(name, tab) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  tab.classList.add('active');
+}
+
+function populateQRSelect() {
+  const sel = document.getElementById('qr-room');
+  sel.innerHTML = '<option value="">Selecione o quarto</option>' +
+    rooms.filter(r=>r.status!=='vago').map(r=>
+      `<option value="${r.num}">${r.num} — ${r.guest}</option>`
+    ).join('');
+}
+
+function generateQR() {
+  const room = document.getElementById('qr-room').value;
+  const guest = document.getElementById('qr-guest').value;
+  if (!room) { alert('Selecione o quarto'); return; }
+  const name = guest || rooms.find(r=>r.num===room)?.guest || 'Hóspede';
+  const url = `${location.href}?room=${room}&guest=${encodeURIComponent(name)}`;
+
+  // QR simples via API gratuita
+  const qrBox = document.getElementById('qr-box');
+  qrBox.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}" style="border-radius:8px;">`;
+
+  document.getElementById('qr-info').innerHTML = `
+    <strong>Quarto ${room}</strong>
+    ${name}<br>
+    <span style="color:var(--green);font-size:11px;"><i class="ri-check-line"></i> QR Code gerado com sucesso</span>
+  `;
+  document.getElementById('btn-print').style.display = 'flex';
+  document.getElementById('guest-room-num').textContent = room;
+}
+
+function printQR() { window.print(); }
+
+function registerReturn() {
+  const params = new URLSearchParams(location.search);
+  const roomNum = params.get('room') || document.getElementById('guest-room-num').textContent;
+  const idx = rooms.findIndex(r=>r.num===roomNum);
+  if (idx>=0 && rooms[idx].status==='fora') {
+    openModal(idx);
+  } else {
+    alert('Retorno já registrado ou quarto não encontrado.');
+  }
+}
+
+// Verificar parâmetros URL para tela do hóspede
+const params = new URLSearchParams(location.search);
+if (params.get('room')) {
+  const roomNum = params.get('room');
+  document.getElementById('guest-room-num').textContent = roomNum;
+  showPanel('hospede', document.querySelectorAll('.tab')[2]);
+}
+
+renderRooms();
+</script>
+</body>
+</html>
