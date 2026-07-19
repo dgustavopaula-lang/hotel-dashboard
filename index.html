@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -547,6 +546,43 @@ function closeModal() {
   document.getElementById('modal').classList.remove('open');
 }
 
+// ── SONS ─────────────────────────────────────────────────────────────────────
+function playBeep(freq=880, duration=0.15, type='sine', vol=0.4) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration);
+  } catch(e) {}
+}
+
+function soundBoasVindas() {
+  // Sequência suave: três tons ascendentes
+  setTimeout(() => playBeep(523, 0.12, 'sine', 0.3), 0);
+  setTimeout(() => playBeep(659, 0.12, 'sine', 0.3), 150);
+  setTimeout(() => playBeep(784, 0.2,  'sine', 0.35), 300);
+}
+
+function soundConfirmacao() {
+  // Dois tons de confirmação
+  setTimeout(() => playBeep(600, 0.1, 'sine', 0.35), 0);
+  setTimeout(() => playBeep(900, 0.25, 'sine', 0.4), 120);
+}
+
+function soundAlertaRecep() {
+  // Alerta discreto para recepção: dois bipes
+  setTimeout(() => playBeep(440, 0.15, 'square', 0.2), 0);
+  setTimeout(() => playBeep(440, 0.15, 'square', 0.2), 300);
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function confirmReturn(idx) {
   const r = rooms[idx];
   r.status = 'retornou';
@@ -554,6 +590,8 @@ function confirmReturn(idx) {
   addLog('ret', r.num, r.guest, `Retornou silenciosamente`);
   renderRooms();
   closeModal();
+  soundConfirmacao();
+  soundAlertaRecep();
 }
 
 function addLog(type, room, guest, desc) {
@@ -616,6 +654,7 @@ function generateQR() {
 function printQR() { window.print(); }
 
 function registerReturn() {
+  soundBoasVindas(); // toca no clique do hóspede — interação válida
   const params = new URLSearchParams(location.search);
   const roomNum = params.get('room') || document.getElementById('guest-room-num').textContent;
   const idx = rooms.findIndex(r=>r.num===roomNum);
